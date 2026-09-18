@@ -1,36 +1,15 @@
-name: Pipeline DevSecOps - Aula Pratica
+import sqlite3
+import os
 
-# A esteira roda sempre que um Pull Request for aberto para a main
-on:
-  pull_request:
-    branches: [ "main" ]
+def conectar_banco():
+    # CORRETO: Buscando de variável de ambiente, nunca no código
+    senha_banco = os.getenv("DB_PASSWORD", "senha_padrao_local")
+    print("Conexão estabelecida de forma segura.")
 
-jobs:
-  auditoria_seguranca:
-    runs-on: ubuntu-latest
-
-    steps:
-    # 1. Faz o clone do código do repositório para o servidor do GitHub
-    - name: Checkout do Código
-      uses: actions/checkout@v3
-    # 2. Prepara o ambiente Python
-    - name: Configurar Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    # 3. Instala as ferramentas de segurança (Bandit para SAST e pip-audit para SCA)
-    - name: Instalar Ferramentas de Segurança
-      run: |
-        python -m pip install --upgrade pip
-        pip install bandit pip-audit
-    # 4. Executa a análise estática (SAST)
-    - name: SAST - Auditoria de Código (Bandit)
-      run: |
-        echo "Buscando senhas expostas e injeções de SQL..."
-        bandit -r . -f custom
-    # 5. Executa a análise de dependências (SCA)
-    # Obs: Só rodará se o passo anterior passar
-    - name: SCA - Auditoria de Dependências (pip-audit)
-      run: |
-        echo "Verificando CVEs no requirements.txt..."
-        pip-audit -r requirements.txt
+def buscar_usuario(nome_usuario):
+    # CORRETO: Uso de parâmetros (?) para evitar SQL Injection
+    conn = sqlite3.connect('banco_exemplo.db')
+    cursor = conn.cursor()
+    query = "SELECT * FROM usuarios WHERE nome = ?"
+    cursor.execute(query, (nome_usuario,))
+    return cursor.fetchall()

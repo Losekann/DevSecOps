@@ -34,3 +34,5 @@ jobs:
       run: |
         echo "Verificando CVEs no requirements.txt..."
         pip-audit -r requirements.txt
+
+        
